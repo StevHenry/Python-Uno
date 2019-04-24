@@ -1,0 +1,6 @@
+<2019-04-24 23:10:03,116> -INFO- [unoserver.py:25] > (MainThread) -- Looking for an available port
+<2019-04-24 23:10:03,117> -INFO- [unoconnection.py:42] > (MainThread) -- Defined IP ('0.0.0.0') is invalid ! Changed to 127.0.0.1 !
+<2019-04-24 23:10:04,114> -DEBUG- [unoconnection.py:46] > (MainThread) -- Error 10061 when trying to check port on ('127.0.0.1', 8800) !
+<2019-04-24 23:10:04,114> -INFO- [unoserver.py:34] > (MainThread) -- No available port could be found ! Trying to force on default_port (8800) !
+<2019-04-24 23:10:04,115> -INFO- [unoserver.py:45] > (UnoServer8800) -- Serveur démarré sur ('127.0.0.1', 8800)
+<2019-04-24 23:10:04,117> -INFO- [unoserver.py:83] > (UnoServer8800) -- Nouvelle connexion à l'adresse: ('127.0.0.1', 51609)
