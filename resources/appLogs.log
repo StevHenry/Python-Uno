@@ -1,6 +1,32 @@
-<2019-04-24 23:10:03,116> -INFO- [unoserver.py:25] > (MainThread) -- Looking for an available port
-<2019-04-24 23:10:03,117> -INFO- [unoconnection.py:42] > (MainThread) -- Defined IP ('0.0.0.0') is invalid ! Changed to 127.0.0.1 !
-<2019-04-24 23:10:04,114> -DEBUG- [unoconnection.py:46] > (MainThread) -- Error 10061 when trying to check port on ('127.0.0.1', 8800) !
-<2019-04-24 23:10:04,114> -INFO- [unoserver.py:34] > (MainThread) -- No available port could be found ! Trying to force on default_port (8800) !
-<2019-04-24 23:10:04,115> -INFO- [unoserver.py:45] > (UnoServer8800) -- Serveur démarré sur ('127.0.0.1', 8800)
-<2019-04-24 23:10:04,117> -INFO- [unoserver.py:83] > (UnoServer8800) -- Nouvelle connexion à l'adresse: ('127.0.0.1', 51609)
+<2019-04-27 02:26:22,971> -INFO- [unoserver.py:25] > (WindowThread) -- Recherche d'un port disponible
+<2019-04-27 02:26:22,972> -INFO- [unoserver.py:91] > (WindowThread) -- L'IP définie ('0.0.0.0') est invalide ! Changement pour 127.0.0.1 !
+<2019-04-27 02:26:23,973> -DEBUG- [unoserver.py:95] > (WindowThread) -- Erreur 10061 en tentant de vérifier le port sur l'adresse '127.0.0.1':8800 !
+<2019-04-27 02:26:23,973> -INFO- [unoserver.py:35] > (WindowThread) -- Pas de port disponible trouvé ! Tentative forcée sur le port par défaut (8800) !
+<2019-04-27 02:26:23,974> -DEBUG- [unoserver.py:38] > (WindowThread) -- Démarrage du thread serveur!
+<2019-04-27 02:26:23,975> -DEBUG- [unoserver.py:46] > (UnoServer8800) -- Démarrage de la coroutine serveur! ('127.0.0.1', 8800)
+<2019-04-27 02:26:23,978> -INFO- [unoserver.py:48] > (UnoServer8800) -- Serveur démarré sur ('127.0.0.1', 8800)
+<2019-04-27 02:26:25,325> -INFO- [unoserver.py:65] > (UnoServer8800) -- Nouveau client à l'adresse: ('127.0.0.1', 50924)
+<2019-04-27 02:26:26,424> -INFO- [unoclient.py:39] > (WindowThread) -- La connexion client au serveur a été fermée !
+<2019-04-27 02:26:26,430> -INFO- [unoserver.py:65] > (UnoServer8800) -- Nouveau client à l'adresse: ('127.0.0.1', 50929)
+<2019-04-27 02:26:28,728> -INFO- [unoclient.py:39] > (WindowThread) -- La connexion client au serveur a été fermée !
+<2019-04-27 02:26:28,734> -INFO- [unoserver.py:65] > (UnoServer8800) -- Nouveau client à l'adresse: ('127.0.0.1', 50934)
+<2019-04-27 02:26:29,456> -INFO- [unoclient.py:39] > (WindowThread) -- La connexion client au serveur a été fermée !
+<2019-04-27 02:26:29,463> -INFO- [unoserver.py:65] > (UnoServer8800) -- Nouveau client à l'adresse: ('127.0.0.1', 50939)
+<2019-04-27 02:26:30,232> -INFO- [unoclient.py:39] > (WindowThread) -- La connexion client au serveur a été fermée !
+<2019-04-27 02:26:30,239> -INFO- [unoserver.py:65] > (UnoServer8800) -- Nouveau client à l'adresse: ('127.0.0.1', 50944)
+<2019-04-27 02:26:31,040> -INFO- [unoclient.py:39] > (WindowThread) -- La connexion client au serveur a été fermée !
+<2019-04-27 02:26:31,047> -INFO- [unoserver.py:65] > (UnoServer8800) -- Nouveau client à l'adresse: ('127.0.0.1', 50949)
+<2019-04-27 02:26:31,712> -INFO- [unoclient.py:39] > (WindowThread) -- La connexion client au serveur a été fermée !
+<2019-04-27 02:26:31,721> -ERROR- [unoserver.py:76] > (UnoServer8800) -- OEF reçu de ('127.0.0.1', 50924)
+<2019-04-27 02:26:31,722> -ERROR- [unoserver.py:79] > (UnoServer8800) -- Connexion perdue avec le client connecté avec ('127.0.0.1', 50924)
+<2019-04-27 02:26:31,723> -ERROR- [unoserver.py:76] > (UnoServer8800) -- OEF reçu de ('127.0.0.1', 50929)
+<2019-04-27 02:26:31,725> -ERROR- [unoserver.py:79] > (UnoServer8800) -- Connexion perdue avec le client connecté avec ('127.0.0.1', 50929)
+<2019-04-27 02:26:31,726> -ERROR- [unoserver.py:76] > (UnoServer8800) -- OEF reçu de ('127.0.0.1', 50934)
+<2019-04-27 02:26:31,727> -ERROR- [unoserver.py:76] > (UnoServer8800) -- OEF reçu de ('127.0.0.1', 50939)
+<2019-04-27 02:26:31,729> -ERROR- [unoserver.py:79] > (UnoServer8800) -- Connexion perdue avec le client connecté avec ('127.0.0.1', 50934)
+<2019-04-27 02:26:31,730> -ERROR- [unoserver.py:79] > (UnoServer8800) -- Connexion perdue avec le client connecté avec ('127.0.0.1', 50939)
+<2019-04-27 02:26:31,732> -ERROR- [unoserver.py:76] > (UnoServer8800) -- OEF reçu de ('127.0.0.1', 50949)
+<2019-04-27 02:26:31,732> -ERROR- [unoserver.py:76] > (UnoServer8800) -- OEF reçu de ('127.0.0.1', 50944)
+<2019-04-27 02:26:31,733> -ERROR- [unoserver.py:79] > (UnoServer8800) -- Connexion perdue avec le client connecté avec ('127.0.0.1', 50949)
+<2019-04-27 02:26:31,733> -ERROR- [unoserver.py:79] > (UnoServer8800) -- Connexion perdue avec le client connecté avec ('127.0.0.1', 50944)
+<2019-04-27 02:26:31,734> -INFO- [unoserver.py:65] > (UnoServer8800) -- Nouveau client à l'adresse: ('127.0.0.1', 50954)

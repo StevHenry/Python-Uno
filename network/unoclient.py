@@ -1,54 +1,53 @@
 # -*- coding: utf-8 -*-
 
 from network.unoconnection import *
+from network.unopacket import UnoPacket
+import logging
 import asyncio
 import threading
+
+
+logger = logging.getLogger(__name__)
 
 
 class UnoClient(UnoConnectivity):
     __name__ = "UnoClient"
 
     def __init__(self, ip="0.0.0.0", default_port=8800):
-        UnoConnectivity.__init__(self, ip=ip, default_port=default_port);
-        self.close_connection = self.close
-        self.is_connected = False
+        UnoConnectivity.__init__(self, ip=ip, default_port=default_port)
+        self.connectionThread = threading.Thread(target=self.__connect, name=(self.__name__ + str(self.port)))
+        self.close_connection = self.__close
         self.loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(self.loop)
+        self.is_linked = False
 
     def connect_client(self):
         self.port = self.default_port
         if str(self.ip) == "0.0.0.0":
             self.ip = "127.0.0.1"
 
-        def connect(unoclient):
-            client = ClientTransport(unoclient)
-            coro = unoclient.loop.create_connection(lambda: client, unoclient.ip, unoclient.port)
-            self.loop.run_until_complete(coro)
-
-        self.connectionThread = threading.Thread(target=connect, args=(self,), name=(self.__name__ + str(self.port)))
         self.connectionThread.start()
 
+    def __connect(self):
+        self.client = ClientTransport(self)
+        asyncio.set_event_loop(self.loop)
+        coro = self.loop.create_connection(lambda: self.client, self.ip, self.port)
+        self.loop.run_until_complete(coro)
+
+    def __close(self):
+        if self.is_linked:
+            self.client.disconnect(self.loop)
+            logger.info("La connexion client au serveur a été fermée !")
+        else:
+            logger.debug("La connexion client au serveur est inexistante ! Impossible de la fermer !")
+
     def is_connected(self):
-        return self.is_connected
+        return self.is_linked
 
     def set_connected(self, is_connected_new_value):
-        self.is_connected = is_connected_new_value
+        self.is_linked = is_connected_new_value
 
-    async def handle_client(self):
-        reader, writer = await asyncio.open_connection(self.ip, self.port, loop=self.loop)
-        writer.write(b"Test")
-        data = await reader.read()
-        logger.debug('Received: %r' % data.decode())
-
-    def close(self):
-        try:
-            self.client.close()
-            logger.info("La connexion client au serveur a été fermée !")
-        except AttributeError:
-            logger.warning("La variable client est introuvable !")
-        finally:
-            self.loop.run_until_complete(self.client.wait_closed())
-            self.loop.close()
+    def get_client_transport(self):
+        return self.client
 
 
 class ClientTransport(asyncio.Protocol):
@@ -57,8 +56,9 @@ class ClientTransport(asyncio.Protocol):
         self.loop = uno_client.loop
         self.transport = None
 
-    def disconnect(self):
-        self.loop.stop()
+    def disconnect(self, loop):
+        self.transport.close()
+        loop.close()
         self.uno_client.set_connected(False)
 
     def connection_made(self, transport):
@@ -68,10 +68,12 @@ class ClientTransport(asyncio.Protocol):
     def data_received(self, data):
         logger.info('Data received from server: {}'.format(data.decode()))
 
-    def send_data_to_tcp(self, data):
-        self.transport.write(data.encode())
+    def send_data(self, packet):
+        if not isinstance(packet, UnoPacket):
+            raise ValueError("Specified data to send is not a Packet !")
+        self.transport.write(bytes(packet.data, encoding="utf-8"))
 
     def connection_lost(self, exc):
-        logger.warn("Le serveur a fermé le serveur ! Fermeture du client ! ({})".format(str(exc)))
+        logger.warning("Le serveur a fermé le serveur ! Fermeture du client ! ({})".format(str(exc)))
         self.loop.stop()
         self.uno_client.set_connected(False)

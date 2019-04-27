@@ -14,15 +14,15 @@ class UnoServer(UnoConnectivity):
 
     def __init__(self, ip="0.0.0.0", default_port=8800):
         UnoConnectivity.__init__(self, ip=ip, default_port=default_port);
-        self.close_connection = self.close
         self.loop = asyncio.new_event_loop()
+        self.close_connection = self.__close
         self.server = None
 
     async def create_server(self):
         """" Générer le serveur sur une intervalle de port entre 'default_port' et 'default_port'+10 """
         globals()
 
-        logger.info("Looking for an available port")
+        logger.info("Recherche d'un port disponible")
         for additive in range(1):
             is_free = await check_port(self, self.default_port + additive)
             if is_free:
@@ -31,60 +31,69 @@ class UnoServer(UnoConnectivity):
                 break
 
         if self.port == 0:
-            logger.info("No available port could be found ! Trying to force on default_port (%r) !" % self.default_port)
+            logger.info("Pas de port disponible trouvé ! Tentative forcée sur le port par défaut (%r) !"
+                        % self.default_port)
             self.port = self.default_port
 
-        self.connectionThread = threading.Thread(target=self.run_server, name=(self.__name__ + str(self.port)))
+        logger.debug("Démarrage du thread serveur!")
+        self.connectionThread = threading.Thread(target=self.__run_server, name=(self.__name__ + str(self.port)))
         self.connectionThread.start()
 
-    def run_server(self):
+    def __run_server(self):
         """ Fonction qui démarre le serveur """
         asyncio.set_event_loop(self.loop)
-        coro = self.loop.create_server(ServerTransport, self.ip, self.port)
+        coro = self.loop.create_server(ServerProtocol, self.ip, self.port)
+        logger.debug("Démarrage de la coroutine serveur! (%r, %r)" % (self.ip, self.port))
         self.server = self.loop.run_until_complete(coro)
         logger.info('Serveur démarré sur {}'.format(self.server.sockets[0].getsockname()))
+        self.loop.run_forever()
 
-        try:
-            self.loop.run_forever()
-        except KeyboardInterrupt:
-            pass
-
-    @asyncio.coroutine
-    async def server_handle(self, reader, writer):
-        data = await reader.read()
-        packet = data.decode()
-        client_address = writer.get_extra_info('peername')
-        logger.debug("Message reçu: %r" % packet)
-        logger.info("Nouveau client à l'adresse %r" % str(client_address))
-        message = "Salut"
-        logger.info("Envoi de: %r" % message)
-        writer.write(bytes(message, encoding="utf-8"))
-        await writer.drain()
-
-        logger.info("Fermeture de la connexion")
-        writer.close()
-
-    def close(self):
+    def __close(self):
         self.server.close()
-        self.loop.run_until_complete(self.server.wait_closed())
-        self.loop.close()
+        new_loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(new_loop)
+        new_loop.run_until_complete(self.server.wait_closed())
         logger.info("Le serveur a été fermé !")
 
 
-class ServerTransport(asyncio.Transport):
-    globals()
-
+class ServerProtocol(asyncio.Transport):
     def __init__(self):
         self.transport = None
     
     def connection_made(self, transport):
         self.transport = transport
-        peername = transport.get_extra_info('peername')
-        logger.info("Nouvelle connexion à l'adresse: {}".format(peername))
+        logger.info("Nouveau client à l'adresse: {}".format(transport.get_extra_info('peername')))
 
     def data_received(self, msg):
-        logger.info("Reçu: {0} de: {1}".format(msg, self.transport.get_extra_info('peername')))
+        logger.info("Reçu: {0} de: {1}".format(msg.decode(), self.transport.get_extra_info('peername')))
 
     def write(self, data):
         self.transport.write(bytes(data, encoding="utf-8"))
-        logger.debug("Sent {0} to {1}".format(data, self.transport.get_extra_info('peername')))
+        logger.debug("Envoi de {0} à {1}".format(data, self.transport.get_extra_info('peername')))
+
+
+    def eof_received(self):
+        logger.error("OEF reçu de {}".format(self.transport.get_extra_info('peername')))
+
+    def connection_lost(self, test):
+        logger.error("Connexion perdue avec le client connecté avec {}".format(self.transport.get_extra_info('peername')))
+
+
+
+async def check_port(cls, tested_port):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        result = sock.connect_ex((cls.ip, tested_port))
+        sock.close()
+        if result == 0:
+            logger.debug("Résultat connexion de vérification de port favorable (%r) !" % tested_port)
+            return True
+        elif result == 10049:
+            logger.info("L'IP définie (%r) est invalide ! Changement pour 127.0.0.1 !" % cls.ip)
+            cls.ip = "127.0.0.1"
+            return await check_port(cls, tested_port)
+        elif result == 10061:
+            logger.debug("Erreur 10061 en tentant de vérifier le port sur l'adresse %r:%r !" % (cls.ip, tested_port))
+            return False
+        else:
+            logger.debug("connect_ex result: %r" % result)
+            return False

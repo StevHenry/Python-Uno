@@ -20,7 +20,6 @@ def is_normal_card_playable(card):
     if isinstance(card, NormalCard) or card.color == __last_card.color:
         if card.color == __last_card.color or card.number == __last_card.number:
             set_last_card(card)
-#           TODO: REMOVE CARD FROM PLAYER HAND
             return True
     return False
 
@@ -30,7 +29,6 @@ def is_special_card_playable(card):
     if isinstance(card, SpecialCard):
         if card.color == __last_card.color or card.attribute == __last_card.attribute or card.color == "BLACK":
             set_last_card(card)
-#           TODO: REMOVE CARD FROM PLAYER HAND
-#           del(myPlayer.player_hand[index])
             return True
     return False
+

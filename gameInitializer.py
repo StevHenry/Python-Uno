@@ -1,8 +1,10 @@
-from network.networkmanager import NetworkManager as nw
-import os
-import json
+from graphics.window import *
+import game_system.player
 import logging.config
-from player import Player
+import threading
+import json
+import signal
+import os
 
 
 def initialize_logger():
@@ -25,10 +27,42 @@ def initialize_logger():
 
 initialize_logger()
 
-playerPseudo = "lolilolulolilol"
+player = game_system.player.Player("lolilolulolilol", "127.0.0.1", -1)
 
-server = nw(is_client_connection=False)
-server.run()
+windowThread = threading.Thread(target=run_window, name="WindowThread")
+windowThread.start()
+windowThread.join()
 
-client = nw(chosen_port=8800)
-client.run()
+# Fermer le programme indépendamment des Threads lancés
+os.kill(os.getpid(), signal.SIG_DFL)
+
+"""
+def run(action):
+    asyncio.get_event_loop().run_until_complete(action)
+
+
+def generate_server():
+    global server
+    server = unoserver.UnoServer()
+    asyncio.get_event_loop().run_until_complete(server.create_server())
+
+
+def generate_client():
+    global client
+    client = unoclient.UnoClient()
+    client.connect_client()
+
+
+def close_all():
+    global client, server
+    client.close()
+    server.close()
+    
+generate_server()
+generate_client()
+
+while not client.is_connected():
+    continue
+
+client.get_client_transport().send_data(NewPlayerPacket(player))
+"""
