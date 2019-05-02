@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from graphics.window import *
 import game_system.player
 import logging.config

@@ -1,0 +1,6 @@
+Chaque joueur commence avec 7 cartes.
+Le but est de poser toutes ses cartes pour gagner la manche!
+
+
+Pour poser une carte, il faut qu'elle ait la même couleur, le même chiffre ou le même symbole que la précédente
+Les cartes noires peuvent être posées sur toutes les cartes.

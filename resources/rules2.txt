@@ -1,0 +1,9 @@
+Passer le tour : le joueur suivant ne joue pas
+
+Changer de sens : le sens de jeu est inversé
+
+Changement de couleur : Le joueur qui a posé cette carte choisit la couleur à joueur
+
++2 : le joueur suivant pioche 2 cartes et passe son tour
+
++4 : le joueur suivant pioche 4 cartes et passe son tour (celui qui a posé le +4 choisit la couleur à joueur)

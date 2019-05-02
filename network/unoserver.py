@@ -71,13 +71,11 @@ class ServerProtocol(asyncio.Transport):
         self.transport.write(bytes(data, encoding="utf-8"))
         logger.debug("Envoi de {0} à {1}".format(data, self.transport.get_extra_info('peername')))
 
-
     def eof_received(self):
         logger.error("OEF reçu de {}".format(self.transport.get_extra_info('peername')))
 
     def connection_lost(self, test):
         logger.error("Connexion perdue avec le client connecté avec {}".format(self.transport.get_extra_info('peername')))
-
 
 
 async def check_port(cls, tested_port):
