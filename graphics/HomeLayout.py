@@ -22,7 +22,6 @@ class HomeMenu(GridScene):
 
         #   "Made by ...":
         Label(self.lm, text="Made by \"Med-Studios\"", font=DEFAULT_FONT, bg=RED, fg="white")\
-            .grid(row=self.rows_count - 2, column=self.columns_count - 1)
+            .grid(row=self.rows_count-2, column=self.columns_count-1)
         #   Developers cards:
-        self.load_image("resources/pictures/Dev.png", 1, RED).grid(row=self.rows_count - 1,
-                                                                   column=self.columns_count - 1)
+        self.load_image("resources/pictures/Dev.png", 1, RED).grid(row=self.rows_count-1, column=self.columns_count-1)

@@ -19,6 +19,7 @@ class UnoClient(UnoConnectivity):
         self.close_connection = self.__close
         self.loop = asyncio.new_event_loop()
         self.is_linked = False
+        self.connection_error = None
 
     def connect_client(self):
         self.port = self.default_port
@@ -28,10 +29,14 @@ class UnoClient(UnoConnectivity):
         self.connectionThread.start()
 
     def __connect(self):
-        self.client = ClientTransport(self)
-        asyncio.set_event_loop(self.loop)
-        coro = self.loop.create_connection(lambda: self.client, self.ip, self.port)
-        self.loop.run_until_complete(coro)
+        try:
+            self.client = ClientTransport(self)
+            asyncio.set_event_loop(self.loop)
+            coro = self.loop.create_connection(lambda: self.client, self.ip, self.port)
+            self.loop.run_until_complete(coro)
+        except ConnectionRefusedError as e:
+            logger.debug("Client connection to provided server is impossible !")
+            self.connection_error = e
 
     def __close(self):
         if self.is_linked:

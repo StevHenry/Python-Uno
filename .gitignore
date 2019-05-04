@@ -1,4 +1,4 @@
 /.idea/*
 /venv/*
 .floo*
-*.log*
+resources/appLogs.log
