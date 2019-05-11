@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from network.unoconnection import *
-from network.unopacket import UnoPacket
+from network.unopacket import *
 import logging
 import asyncio
 import threading
@@ -34,13 +34,16 @@ class UnoClient(UnoConnectivity):
             asyncio.set_event_loop(self.loop)
             coro = self.loop.create_connection(lambda: self.client, self.ip, self.port)
             self.loop.run_until_complete(coro)
+            self.loop.run_forever()
         except ConnectionRefusedError as e:
-            logger.debug("Client connection to provided server is impossible !")
             self.connection_error = e
+            logger.debug("Client connection to provided server is impossible !")
 
     def __close(self):
+        from game_system.game import my_player
+        self.client.send_data(PlayerDisconnectPacket(my_player))
         if self.is_linked:
-            self.client.disconnect(self.loop)
+            self.client.disconnect()
             logger.info("La connexion client au serveur a été fermée !")
         else:
             logger.debug("La connexion client au serveur est inexistante ! Impossible de la fermer !")
@@ -61,9 +64,8 @@ class ClientTransport(asyncio.Protocol):
         self.loop = uno_client.loop
         self.transport = None
 
-    def disconnect(self, loop):
+    def disconnect(self):
         self.transport.close()
-        loop.close()
         self.uno_client.set_connected(False)
 
     def connection_made(self, transport):
@@ -71,14 +73,20 @@ class ClientTransport(asyncio.Protocol):
         self.uno_client.set_connected(True)
 
     def data_received(self, data):
-        logger.info('Data received from server: {}'.format(data.decode()))
+        logger.debug("Packet: \"{}\" from SERVER".format(data.decode()))
+        packet_id, packet_data = data.decode().split("#", 1)
+        parse_packet(self, packet_id, packet_data).execute_client()
 
     def send_data(self, packet):
         if not isinstance(packet, UnoPacket):
-            raise ValueError("Specified data to send is not a Packet !")
-        self.transport.write(bytes(packet.data, encoding="utf-8"))
+            raise ValueError("Specified messages to send is not a UnoPacket !")
+        self.transport.write(bytes(packet.get_formatted_data(), encoding="utf-8"))
 
     def connection_lost(self, exc):
-        logger.warning("Le serveur a fermé le serveur ! Fermeture du client ! ({})".format(str(exc)))
-        self.loop.stop()
+        logger.warning("Connexion perdue ! ({})".format(str(exc)))
+        from graphics.window import layout_manager
+        from uno_messages import messages
+        if layout_manager.play.error is None:
+            layout_manager.play.error = messages["error"]["connection_lost"]
         self.uno_client.set_connected(False)
+        self.loop.stop()

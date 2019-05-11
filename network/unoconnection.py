@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import asyncio
-import socket
-import logging
 
 
 class UnoConnectivity(object):
@@ -22,4 +20,4 @@ class UnoConnectivity(object):
         asyncio.set_event_loop(self.new_loop)
 
     def close_connection(self):
-        pass
+        raise NotImplementedError

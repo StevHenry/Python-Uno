@@ -1,0 +1,73 @@
+{
+  "window": {
+    "prefix": "Uno - ",
+    "home": {
+      "name": "Menu principal",
+      "play_button": "JOUER",
+      "rules_button": "RÈGLES",
+      "creators": "Made by \"Med-Studios\""
+    },
+    "play": {
+      "name": "Sélection du serveur",
+      "create_server": "CRÉER UN SERVEUR",
+      "join_server": "REJOINDRE UN SERVEUR",
+      "type_pseudo": "ENTREZ UN PSEUDONYME:"
+    },
+    "server": {
+      "joining": {
+        "name": "Rejoindre une partie...",
+        "title": "- REJOINDRE UNE PARTIE -",
+        "ip": "IP du serveur:",
+        "port": "Port du serveur:",
+        "execute": "Connexion"
+      },
+      "hosting": {
+        "name": "Héberger un serveur",
+        "title": "- HÉBERGER UN SERVEUR -",
+        "port": "Port du serveur désiré:",
+        "execute": "Démarrer"
+      }
+    },
+    "loading": {
+      "name": "Chargement...",
+      "server_joining": "Connexion au serveur...",
+      "server_creating": "Création du serveur..."
+    },
+    "rules": {
+      "name": "Règles",
+      "title_1": "RÈGLES",
+      "title_2": "CARTES SPÉCIALES"
+    },
+    "waiting_room": {
+      "name": "Salle d'attente",
+      "title": "SALLE D'ATTENTE:",
+      "server_info": "Serveur {0}:{1}\nHôte: {2}\nVotre pseudo: {3}",
+      "players_display": "JOUEURS [{}]",
+      "begin": {
+        "host_less": "Démarrer (Il manque encore {} joueurs !)",
+        "host_valid": "Démarrer",
+        "client": "Seul l'hôte du serveur peut lancer la partie !"
+      }
+    },
+    "game":{
+      "name":"Partie"
+    }
+  },
+  "quit":{
+    "name":"Quitter UNO",
+    "question":"Voulez-vous vraiment quitter? ⊙_⊙",
+    "question_host":"Voulez-vous vraiment quitter? Vous êtes l'hôte de la partie : quitter la terminera !"
+  },
+  "error": {
+    "configuration": {
+      "pseudo": "Le pseudonyme spécifié ne possède pas au bon format ! Il faut inscrire un pseudo non nul et ne contenant pas de # !",
+      "ip": "L'IP spécifiée ne possède pas un bon format !",
+      "port": "Le port spécifié ne possède pas un bon format! Celui-ci ne doit contenir que des chiffres !"
+    },
+    "timeout": "Timeout !",
+    "connection_lost":"Connexion au serveur perdue !",
+    "server_full":"Connexion refusée ! Le serveur est plein !",
+    "server_closed_by_host":"Arrêt du serveur ! L'hôte a fermé son jeu !",
+    "host_ended_game":"Arrêt du serveur ! L'hôte a terminé la partie !"
+  }
+}

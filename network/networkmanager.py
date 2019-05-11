@@ -1,30 +1,33 @@
 from network import unoserver, unoclient
-from game_system.player import Player
+from network.unopacket import *
+from game_system import game
 import asyncio
 import logging
 
 logger = logging.getLogger(__name__)
+is_host = False
 server = None
 client = None
 
 
-def create_server():
-    global server
-    if server is None:
-        server = unoserver.UnoServer()
-        asyncio.get_event_loop().run_until_complete(server.create_server())
-    else:
-        server.close_connection()
-        server = None
-        create_server()
+def create_server(ip, port):
+    global is_host, server
+    is_host = True
+    server = unoserver.UnoServer(ip, port)
+    asyncio.get_event_loop().run_until_complete(server.create_server())
 
 
-def connect_client():
+def connect_client(ip, port):
     global client
-    if client is None:
-        client = unoclient.UnoClient()
-        client.connect_client()
-    else:
-        client.close_connection()
-        client = None
-        connect_client()
+    client = unoclient.UnoClient(ip, port)
+    client.connect_client()
+
+
+def client_success_connect():
+    global client
+    client.get_client_transport().send_data(PlayerJoinPacket(game.my_player))
+
+
+def launch_game():
+    global client
+    client.get_client_transport().send_data(RunServerPacket())
