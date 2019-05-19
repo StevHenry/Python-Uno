@@ -80,6 +80,7 @@ class GridScene:
 
 class LayoutManager(Frame):
     def __init__(self, frame):
+        global layout_manager
         Frame.__init__(self, frame)
         self.uno_frame = frame
         self.grid(sticky="nsew")
@@ -107,7 +108,7 @@ def initialize_window():
 
 
 def run_window():
-    global layout_manager, messages
+    global layout_manager
     initialize_window()
     layout_manager.uno_frame.mainloop()
 

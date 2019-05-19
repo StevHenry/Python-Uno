@@ -42,7 +42,7 @@
       "name": "Salle d'attente",
       "title": "SALLE D'ATTENTE:",
       "server_info": "Serveur {0}:{1}\nHôte: {2}\nVotre pseudo: {3}",
-      "players_display": "JOUEURS [{}]",
+      "players_display": "JOUEURS [{}]:",
       "begin": {
         "host_less": "Démarrer (Il manque encore {} joueurs !)",
         "host_valid": "Démarrer",
@@ -54,9 +54,9 @@
     }
   },
   "quit":{
-    "name":"Quitter UNO",
+    "name":"Quitter UNO?",
     "question":"Voulez-vous vraiment quitter? ⊙_⊙",
-    "question_host":"Voulez-vous vraiment quitter? Vous êtes l'hôte de la partie : quitter la terminera !"
+    "question_host":"Quitter la partie la terminera! Voulez-vous vraiment quitter?"
   },
   "error": {
     "configuration": {
@@ -66,6 +66,8 @@
     },
     "timeout": "Timeout !",
     "connection_lost":"Connexion au serveur perdue !",
+    "pseudo_already_existing":"Connexion refusée ! Un joueur au même pseudo est déjà connectée !",
+    "game_started":"Connexion refusée ! La partie a déjà commencé !",
     "server_full":"Connexion refusée ! Le serveur est plein !",
     "server_closed_by_host":"Arrêt du serveur ! L'hôte a fermé son jeu !",
     "host_ended_game":"Arrêt du serveur ! L'hôte a terminé la partie !"

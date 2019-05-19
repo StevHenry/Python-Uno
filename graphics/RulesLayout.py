@@ -26,9 +26,7 @@ class RulesMenu(GridScene):
             .grid(row=self.rows_count - 1, column=self.columns_count - 1, sticky="se")
 
         # Return:
-        image = PhotoImage(file="resources/pictures/Return.png").subsample(6)
+        image = PhotoImage(file="resources/pictures/Return.png").subsample(7)
         button = Button(self.lm, image=image, relief="solid", borderwidth=0, highlightthickness=0, bg=RED,
                         command=self.lm.home.display, compound="center")
         button.image = image
-
-        button.grid(row=self.rows_count-1, column=1)

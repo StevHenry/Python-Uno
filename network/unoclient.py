@@ -6,7 +6,6 @@ import logging
 import asyncio
 import threading
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -16,7 +15,7 @@ class UnoClient(UnoConnectivity):
     def __init__(self, ip="0.0.0.0", default_port=8800):
         UnoConnectivity.__init__(self, ip=ip, default_port=default_port)
         self.connectionThread = threading.Thread(target=self.__connect, name=(self.__name__ + str(self.port)))
-        self.close_connection = self.__close
+        self.ask_close = False
         self.loop = asyncio.new_event_loop()
         self.is_linked = False
         self.connection_error = None
@@ -38,13 +37,22 @@ class UnoClient(UnoConnectivity):
         except ConnectionRefusedError as e:
             self.connection_error = e
             logger.debug("Client connection to provided server is impossible !")
+        from graphics import GameLayout
+        from game_system import game
+        from network import networkmanager as nm
+        GameLayout.player_hands = []
+        game.players_in_game = []
+        game.is_playing = False
+        game.last_played_card = None
+        nm.is_host = False
 
-    def __close(self):
+    def close_connection(self):
         from game_system.game import my_player
         self.client.send_data(PlayerDisconnectPacket(my_player))
         if self.is_linked:
             self.client.disconnect()
-            logger.info("La connexion client au serveur a été fermée !")
+            self.is_linked = False
+            logger.info("La connexion du client a été fermée !")
         else:
             logger.debug("La connexion client au serveur est inexistante ! Impossible de la fermer !")
 
@@ -79,14 +87,15 @@ class ClientTransport(asyncio.Protocol):
 
     def send_data(self, packet):
         if not isinstance(packet, UnoPacket):
-            raise ValueError("Specified messages to send is not a UnoPacket !")
+            raise ValueError("Specified message to send is not a UnoPacket !")
         self.transport.write(bytes(packet.get_formatted_data(), encoding="utf-8"))
 
     def connection_lost(self, exc):
-        logger.warning("Connexion perdue ! ({})".format(str(exc)))
+        if self.uno_client.is_linked:
+            logger.warning("Connexion perdue ! ({})".format(str(exc)))
         from graphics.window import layout_manager
         from uno_messages import messages
-        if layout_manager.play.error is None:
+        if layout_manager.play.error is None and not self.uno_client.ask_close:
             layout_manager.play.error = messages["error"]["connection_lost"]
         self.uno_client.set_connected(False)
         self.loop.stop()

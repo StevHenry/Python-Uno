@@ -10,10 +10,10 @@ server = None
 client = None
 
 
-def create_server(ip, port):
+def create_server(port):
     global is_host, server
     is_host = True
-    server = unoserver.UnoServer(ip, port)
+    server = unoserver.UnoServer(port)
     asyncio.get_event_loop().run_until_complete(server.create_server())
 
 
@@ -24,7 +24,9 @@ def connect_client(ip, port):
 
 
 def client_success_connect():
+    from game_system import game
     global client
+    game.is_playing = False
     client.get_client_transport().send_data(PlayerJoinPacket(game.my_player))
 
 

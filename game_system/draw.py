@@ -29,7 +29,8 @@ def get_upper_card():
 def reload_draw():
     """ Ajoute toutes les cartes à la pioche """
     global draw, used_draw
-    shuffle(used_draw)
+    for i in range(3):
+        shuffle(used_draw)
     draw.extend(used_draw)
     used_draw = []
 

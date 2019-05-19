@@ -1,7 +1,7 @@
-COLORS = ("V_GREEN", "B_BLUE", "R_RED", "J_YELLOW")
+COLORS = ("GREEN", "BLUE", "RED", "YELLOW")
 SPECIAL_TYPES = ("S", "I", "+2")
 #            Switch - Interdit
-BLACK_TYPES = ("COLORSWAP", "+4")
+BLACK_TYPES = ("colorSwap", "+4")
 NUMBERS = range(1, 10)
 
 

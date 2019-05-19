@@ -14,10 +14,11 @@ players = []
 class UnoServer(UnoConnectivity):
     __name__ = "UnoServer"
 
-    def __init__(self, ip="0.0.0.0", default_port=8800):
-        UnoConnectivity.__init__(self, ip=ip, default_port=default_port)
+    def __init__(self, default_port=8800):
+        UnoConnectivity.__init__(self, default_port=default_port)
         self.loop = asyncio.new_event_loop()
         self.close_connection = self.__close
+        self.local_ip = get_ip()
         self.server = None
         self.host = None
 
@@ -26,8 +27,8 @@ class UnoServer(UnoConnectivity):
         globals()
 
         logger.debug("Recherche d'un port disponible")
-        for additive in range(4):
-            is_free = await check_port(self, self.default_port + additive)
+        for additive in range(1):
+            is_free = await check_port(self, self.local_ip, self.default_port + additive)
             if is_free:
                 logger.info("Port libre trouvé: %r" % str(self.default_port + additive))
                 self.port = self.default_port + additive
@@ -48,17 +49,20 @@ class UnoServer(UnoConnectivity):
         coro = self.loop.create_server(ServerProtocol, self.ip, self.port)
         logger.debug("Démarrage de la coroutine serveur! (%r, %r)" % (self.ip, self.port))
         self.server = self.loop.run_until_complete(coro)
-        logger.info('Serveur démarré sur {}'.format(self.server.sockets[0].getsockname()))
-        self.loop.run_forever()
+        logger.info('Serveur démarré sur {0}:{1}'.format(self.local_ip, self.port))
+        self.server = self.loop.run_forever()
 
     def __close(self, reason):
+        """ Fonction qui ferme le serveur """
         for pl in players:
             pl.network_data.transport_protocol.send_data(StopServerPacket(reason))
-
-        self.server.close()
         new_loop = asyncio.new_event_loop()
         asyncio.set_event_loop(new_loop)
+        self.server.close()
         new_loop.run_until_complete(self.server.wait_closed())
+        self.new_loop.close()
+        from game_system import game
+        game.is_playing = False
         logger.info("Le serveur a été fermé !")
 
 
@@ -68,13 +72,8 @@ class ServerProtocol(asyncio.Transport):
     
     def connection_made(self, transport):
         self.transport = transport
-        if len(players) >= 4:
-            from uno_messages import messages
-            self.transport.write(bytes(StopServerPacket(messages["error"]["server_full"]).get_formatted_data(),
-                                       encoding="utf-8"))
-            logger.debug("Connexion d'un nouveau client refusée ! Le serveur est plein !")
-            return
         logger.info("Nouveau client à l'adresse: {}".format(transport.get_extra_info("peername")))
+        new_connection(transport)
 
     def data_received(self, data):
         logger.debug("Packet: \"{0}\" from {1}".format(data.decode(), self.transport.get_extra_info("peername")))
@@ -83,7 +82,7 @@ class ServerProtocol(asyncio.Transport):
 
     def send_data(self, packet):
         if not isinstance(packet, UnoPacket):
-            raise ValueError("Specified messages to send is not a UnoPacket !")
+            raise ValueError("Specified message to send is not a UnoPacket !")
         self.transport.write(bytes(packet.get_formatted_data(), encoding="utf-8"))
 
     def write(self, data):
@@ -97,17 +96,25 @@ class ServerProtocol(asyncio.Transport):
         logger.error("Connexion perdue avec le client connecté avec %r" % str(self.transport.get_extra_info("peername")))
 
 
-async def check_port(cls, tested_port):
+def get_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(('10.255.255.255', 1))
+        IP = s.getsockname()[0]
+    except:
+        IP = '127.0.0.1'
+    finally:
+        s.close()
+    return IP
+
+
+async def check_port(cls, ip, tested_port):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-        result = sock.connect_ex((cls.ip, tested_port))
+        result = sock.connect_ex((ip, tested_port))
         sock.close()
         if result == 0:
             logger.debug("Résultat connexion de vérification de port favorable (%r) !" % tested_port)
             return True
-        elif result == 10049:
-            logger.debug("L'IP définie (%r) est invalide ! Changement pour 127.0.0.1 !" % cls.ip)
-            cls.ip = "127.0.0.1"
-            return await check_port(cls, tested_port)
         elif result == 10061:
             logger.debug("Erreur 10061 en tentant de vérifier le port sur l'adresse %r:%r !" % (cls.ip, tested_port))
             return False
@@ -116,25 +123,39 @@ async def check_port(cls, tested_port):
             return False
 
 
-def add_player(player):
-    players.append(player)
-    logger.info("Nouveau joueur ! ({})".format(str(player)))
+def new_connection(transport):
+    from game_system.game import is_playing
+    from uno_messages import messages
+    if len(players) >= 4:
+        transport.write(bytes(ConnectionRefusedPacket(messages["error"]["server_full"]).get_formatted_data(), encoding="utf-8"))
+        transport.close()
+        logger.debug("Connexion d'un nouveau client refusée ! Le serveur est plein !")
+        return
+    elif is_playing:
+        transport.write(bytes(ConnectionRefusedPacket(messages["error"]["game_started"]).get_formatted_data(), encoding="utf-8"))
+        transport.close()
+        logger.debug("Connexion d'un nouveau client refusée ! La partie a déjà commencé !")
 
 
-def remove_player(player):
-    players.remove(player)
-    logger.debug("Joueur supprimé ! ({})".format(str(player)))
+def add_player(pl):
+    players.append(pl)
+    logger.debug("Nouveau joueur ! ({})".format(str(pl)))
+
+
+def remove_player(pl):
+    players.remove(pl)
+    logger.debug("Joueur supprimé ! ({})".format(str(pl)))
 
 
 def get_player_by_name(name):
-    for player in players:
-        if player.pseudonym == name:
-            return player
+    for pl in players:
+        if pl.pseudonym == name:
+            return pl
     return None
 
 
 def get_player_by_connection(ip, port):
-    for player in players:
-        if str(player.network_data.player_ip) == str(ip) and int(player.network_data.player_port) == int(port):
-            return player
+    for pl in players:
+        if str(pl.network_data.player_ip) == str(ip) and int(pl.network_data.player_port) == int(port):
+            return pl
     return None

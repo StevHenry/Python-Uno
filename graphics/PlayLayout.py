@@ -2,7 +2,7 @@ from graphics.window import *
 from tkinter import StringVar, Entry
 import re
 
-ip_var = StringVar(value="127.0.0.1")
+ip_var = StringVar(value="holyteam.servegame.com")
 port_var = StringVar(value="8800")
 pseudonym = StringVar(value=game.my_player.pseudonym)
 
@@ -15,7 +15,6 @@ class PlayMenu(GridScene):
     def display(self):
         self.initialize_page(messages["window"]["play"]["name"], 5, 9)
 
-        #   Logo:
         self.load_image("resources/pictures/Logo (2).png", 1, RED).grid(row=0, column=0, columnspan=self.columns_count)
 
         Button(self.lm, text=messages["window"]["play"]["create_server"], activebackground=YELLOW, bg=YELLOW, fg=RED,
@@ -33,16 +32,16 @@ class PlayMenu(GridScene):
                                                               columnspan=self.columns_count)
 
         if self.error is not None:
-            Label(self.lm, text=self.error, font=("Arial", 12, "bold"), bg=RED, fg="white") \
+            Label(self.lm, text=self.error, font=("Arial", 12, "bold"), bg=RED, fg="black") \
                 .grid(row=2, rowspan=2, column=0, columnspan=self.columns_count)
             self.error = None
 
         # Return:
-        image = PhotoImage(file="resources/pictures/Return.png").subsample(6)
+        image = PhotoImage(file="resources/pictures/Return.png").subsample(7)
         button = Button(self.lm, image=image, relief="solid", borderwidth=0, highlightthickness=0, bg=RED,
                         command=self.lm.home.display, compound="center")
         button.image = image
-        button.grid(row=self.rows_count - 1, column=0, columnspan=self.columns_count)
+        button.grid(row=0, column=0, sticky="nw")
 
 
 class LoadingPane:
@@ -84,6 +83,13 @@ class SelectServerPane:
                command=LoadingPane(self.scene, messages["window"]["loading"]["server_joining"], self.try_client_connection).display) \
             .grid(row=self.scene.rows_count - 1, column=0, columnspan=self.scene.columns_count)
 
+        # Return:
+        image = PhotoImage(file="resources/pictures/Return.png").subsample(7)
+        button = Button(self.scene.lm, image=image, relief="solid", borderwidth=0, highlightthickness=0, bg=RED,
+                        command=self.scene.lm.play.display, compound="center")
+        button.image = image
+        button.grid(row=0, column=0, sticky="nw")
+
     @staticmethod
     def try_client_connection():
         if not re.compile("[\\S]+").match(ip_var.get()):
@@ -97,7 +103,7 @@ class SelectServerPane:
             not_connected(messages["error"]["configuration"]["port"])
             return
 
-        logger.debug("IP, port: OK")
+        logger.debug("IP, port shapes: OK")
 
         try:
             nm.connect_client(str(ip_var.get()), int(port_var.get().replace(" ", "")))
@@ -117,7 +123,8 @@ class SelectServerPane:
                     time.sleep(0.5)
                     laps += 1
                 else:
-                    not_connected(messages["error"]["timeout"])
+                    not_connected(messages["error"]["timeout"] if nm.client is not None and not nm.client.ask_close else
+                                  None)
                     break
 
 
@@ -143,10 +150,17 @@ class ConfigureServerPane:
                relief='solid', takefocus=1, font=("Trebuchet MS", 15, "bold"), height=2, width=30, border=0.5,
                command=self.start).grid(row=self.scene.rows_count - 1, column=0, columnspan=self.scene.columns_count)
 
+        # Return:
+        image = PhotoImage(file="resources/pictures/Return.png").subsample(7)
+        button = Button(self.scene.lm, image=image, relief="solid", borderwidth=0, highlightthickness=0, bg=RED,
+                        command=self.scene.lm.play.display, compound="center")
+        button.image = image
+        button.grid(row=0, column=0, sticky="nw")
+
     def start(self):
         try:
             int(port_var.get())
-            logger.debug("Port: OK")
+            logger.debug("Port shape: OK")
         except ValueError:
             logger.debug("Le port spécifié n'est pas correct!")
             not_connected(messages["error"]["configuration"]["port"])
@@ -157,10 +171,11 @@ class ConfigureServerPane:
     @staticmethod
     def run_server_and_connect():
         try:
-            nm.create_server("127.0.0.1", int(port_var.get().replace(" ", "")))
-            nm.connect_client("127.0.0.1", int(port_var.get().replace(" ", "")))
+            nm.create_server(int(port_var.get().replace(" ", "")))
+            nm.connect_client(nm.server.local_ip, int(port_var.get().replace(" ", "")))
         except Exception as e:
             not_connected(e)
+            return
 
         laps = 0
         while True:
@@ -175,7 +190,8 @@ class ConfigureServerPane:
                     time.sleep(0.5)
                     laps += 1
                 else:
-                    not_connected("Timeout !")
+                    not_connected(messages["error"]["timeout"] if nm.client is not None and not nm.client.ask_close else
+                                  None)
                     break
 
 
@@ -198,4 +214,5 @@ def connected():
 def not_connected(message):
     from graphics.window import layout_manager
     layout_manager.play.error = message
-    layout_manager.play.display()
+    if message is not None:
+        layout_manager.play.display()
